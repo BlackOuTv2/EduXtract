@@ -1,0 +1,67 @@
+# Virtual Environment
+venv/
+.venv/
+
+# Python Cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+
+# Logs (including rotated backups)
+*.log
+*.log.*
+
+# Downloaded / staged content
+Download_Files/
+out/
+
+# Build Output
+dist/
+build/
+*.spec
+*.exe
+
+# Environment / Secrets
+.env
+.env.example
+config.py
+
+# Auth tokens & session files (never commit)
+*_token.json
+*_token.txt
+ci_session.txt
+signed_url.json
+
+# Data files
+*.csv
+*.mpd
+*.bak
+
+# Database
+database/*.db
+database/*.sqlite
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Claude Code settings
+.claude/
+
+# Nuitka intermediate artifacts
+*.nuitka-*
+*.onefile-build/
+
+# Local development artifacts
+*.tmp
+
+# NOTE: Client-specific paths are excluded locally via .git/info/exclude
+# (kept out of this tracked file so no client names are ever published).

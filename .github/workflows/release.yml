@@ -1,0 +1,68 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  build-and-release:
+    name: Build Standalone EXE & Create Release
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install nuitka zstandard
+
+      - name: Extract version from tag
+        id: version
+        shell: bash
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Build with Nuitka
+        run: |
+          python -m nuitka `
+            "$env:ENTRY_POINT" `
+            --standalone `
+            --onefile `
+            --lto=yes `
+            --jobs=4 `
+            --follow-imports `
+            --output-dir=dist `
+            --output-filename="EduXtract-${{ steps.version.outputs.VERSION }}.exe" `
+            --no-pyi-file
+        env:
+          # Entry point supplied via repository/organization secret so the
+          # module layout is not published in this workflow.
+          ENTRY_POINT: ${{ secrets.BUILD_ENTRY_POINT }}
+
+      - name: Create release archive
+        run: |
+          mkdir release
+          copy dist\EduXtract-${{ steps.version.outputs.VERSION }}.exe release\
+          copy .env.example release\
+          copy README.md release\
+          copy USAGE.md release\
+          Compress-Archive -Path release\* -DestinationPath "EduXtract-${{ steps.version.outputs.VERSION }}-windows-x64.zip"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "EduXtract ${{ steps.version.outputs.VERSION }}"
+          body_path: RELEASE_NOTES.md
+          files: |
+            EduXtract-${{ steps.version.outputs.VERSION }}-windows-x64.zip
+          draft: true
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
